@@ -1,4 +1,5 @@
 #include <iostream>
+//#include <string>
 //#include <Winsock2.h> //socket, bind, listen...
 #include "GameManager.h"
 #include "InputManager.h"
@@ -33,13 +34,28 @@ int main()
 
     Game game;
 
-    std::cout << "Enter username: " << std::endl;
+    std::string enterS = "Enter username: ";
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - enterS.size()) / 2, Console::getInstance().charRows / 2 - 1);
+    std::cout << enterS;
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - enterS.size()) / 2, Console::getInstance().charRows / 2);
     std::cin >> game.username_;
     game.profileManager_.RegisterUser(game.username_);
+    Console::getInstance().Clear();
 
     while(game.playing_)
     {
         game.StartGame();
+
+        std::string retryS = "  RETRY  ";
+        BoxButton retryB(retryS.size(), 1, Console::getInstance().charColumns / 2 - retryS.size() * 2, game.gameBoard_.boardStartY + game.gameBoard_.GetSizeY() * 2 + 1);
+        Console::getInstance().ChangeTextColor(COLORS::GREEN);
+        retryB.UpdateText(retryS);
+
+        std::string exitS = "  EXIT  ";
+        BoxButton exitB(exitS.size(), 1, Console::getInstance().charColumns / 2 + exitS.size() * 2, game.gameBoard_.boardStartY + game.gameBoard_.GetSizeY() * 2 + 1);
+        Console::getInstance().ChangeTextColor(COLORS::RED);
+        exitB.UpdateText(exitS);
+        Console::getInstance().ChangeTextColor(COLORS::BLACK);
 
 #ifndef MOUSE_L
         std::string text = "MODE: CHECK";
@@ -126,6 +142,19 @@ int main()
                         game.EndGame(false);
                         break;
                     }
+                }
+
+                if (retryB.IsClicked(uVec2(posX, posY)))
+                {
+                    InputManager::getInstance().idxX = 0;
+                    InputManager::getInstance().idxY = 0;
+                    Console::getInstance().Clear();
+                    break;
+                }
+                if (exitB.IsClicked(uVec2(posX, posY)))
+                {
+                    game.playing_ = false;
+                    break;
                 }
             }
 

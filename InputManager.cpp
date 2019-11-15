@@ -33,6 +33,42 @@ void ConsoleButton::UpdateText(std::string newText)
     std::cout << text_;
 }
 
+BoxButton::BoxButton(int sizeX, int sizeY, int posX, int posY) : ConsoleButton(sizeX, sizeY, posX, posY)
+{
+}
+
+//BoxButton::BoxButton(uVec2 bSize, uVec2 pos) : ConsoleButton(uVec2 bSize, uVec2 pos)
+//{
+//}
+
+bool BoxButton::IsClicked(uVec2 mousePos)
+{
+    if (mousePos.x >= position_.x && mousePos.x <= position_.x + size_.x &&
+        mousePos.y >= position_.y && mousePos.y <= position_.y + size_.y)
+        return true;
+    else
+        return false;
+}
+
+void BoxButton::UpdateText(std::string newText)
+{
+    text_ = newText;
+
+    Console::getInstance().GoToXY(position_.x - 1, position_.y - 1);
+    for (unsigned int i = 0; i < size_.x + 2; ++i)
+        std::cout << '-';
+    Console::getInstance().GoToXY(position_.x - 1, position_.y);
+    std::cout << '|';
+    for (unsigned int i = 0; i < size_.x; ++i)
+        std::cout << ' ';
+    Console::getInstance().GoToXY(position_.x, position_.y);
+    std::cout << text_;
+    std::cout << '|';
+    Console::getInstance().GoToXY(position_.x - 1, position_.y + 1);
+    for (unsigned int i = 0; i < size_.x + 2; ++i)
+        std::cout << '-';
+}
+
 void InputManager::Initialize()
 {
     currState.resize(INPUT_KEY_NUMBER);

@@ -36,7 +36,11 @@ void Console::GoToXY(int x, int y)
     COORD coords;
     coords.X = x;
     coords.Y = y;
-    SetConsoleCursorPosition(handle, coords);
+
+    if (!SetConsoleCursorPosition(handle, coords))
+    {
+        std::cout << "Console::GoToXY failed.";
+    }
 }
 
 COORD Console::GetCursorPos()
@@ -90,35 +94,53 @@ void Game::StartGame()
 {
     ended_ = false;
 
-    std::cout << "Select difficulty: " << std::endl;
-    std::cout << "0: Beginner" << std::endl;
-    std::cout << "1: Intermediate" << std::endl;
-    std::cout << "2: Expert" << std::endl;
+    std::string difficultyS = "--Select difficulty--";
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - difficultyS.size()) / 2, Console::getInstance().charRows / 2 - 8);
+    std::cout << difficultyS;
+
+    std::string text0 = "  Beginner  ";
+    BoxButton begginerB(text0.size(), 1, (Console::getInstance().charColumns - text0.size()) / 2, Console::getInstance().charRows / 2 - 4);
+    Console::getInstance().ChangeTextColor(COLORS::GREEN);
+    begginerB.UpdateText(text0);
+
+    std::string text1 = "  Intermediate  ";
+    BoxButton intermidiateB(text1.size(), 1, (Console::getInstance().charColumns - text1.size()) / 2, Console::getInstance().charRows / 2);
+    Console::getInstance().ChangeTextColor(COLORS::BLUE);
+    intermidiateB.UpdateText(text1);
+
+    std::string text2 = "  Expert  ";
+    BoxButton expertB(text2.size(), 1, (Console::getInstance().charColumns - text2.size()) / 2, Console::getInstance().charRows / 2 + 4);
+    Console::getInstance().ChangeTextColor(COLORS::RED);
+    expertB.UpdateText(text2);
+    Console::getInstance().ChangeTextColor(COLORS::BLACK);
+
     //std::cout << "3: Custom" << std::endl;
 
     unsigned int difficulty;
     while (true)
     {
-        if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::ZERO))
+        if (InputManager::getInstance().KeyTriggered(MK_LBUTTON) || InputManager::getInstance().KeyTriggered(MK_RBUTTON))
         {
-            difficulty = 0;
-            break;
+            float posX = InputManager::getInstance().GetMousePos().x;
+            float posY = InputManager::getInstance().GetMousePos().y;
+            Console::getInstance().ScreenToConsole(posX, posY);
+
+            if (begginerB.IsClicked(uVec2(posX, posY)))
+            {
+                difficulty = 0;
+                break;
+            }
+            if (intermidiateB.IsClicked(uVec2(posX, posY)))
+            {
+                difficulty = 1;
+                break;
+            }
+            if (expertB.IsClicked(uVec2(posX, posY)))
+            {
+                difficulty = 2;
+                break;
+            }
         }
-        if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::ONE))
-        {
-            difficulty = 1;
-            break;
-        }
-        if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::TWO))
-        {
-            difficulty = 2;
-            break;
-        }
-        //if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::THREE))
-        //{
-        //    difficulty = 3;
-        //    break;
-        //}
     }
 
     if(difficulty == 0)
@@ -204,6 +226,42 @@ void Game::EndGame(bool win)
         std::cout << "Mines remaining: " << gameBoard_.GetMines() - gameBoard_.GetFoundMines() << "/" << gameBoard_.GetMines() << std::endl;
     }
 
+    std::string retryS = "  RETRY  ";
+    BoxButton retryB(retryS.size(), 1, Console::getInstance().charColumns / 2 - retryS.size() * 2, gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2 + 1);
+    Console::getInstance().ChangeTextColor(COLORS::GREEN);
+    retryB.UpdateText(retryS);
+
+    std::string exitS = "  EXIT  ";
+    BoxButton exitB(exitS.size(), 1, Console::getInstance().charColumns / 2 + exitS.size() * 2, gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2 + 1);
+    Console::getInstance().ChangeTextColor(COLORS::RED);
+    exitB.UpdateText(exitS);
+    Console::getInstance().ChangeTextColor(COLORS::BLACK);
+
+    while (true)
+    {
+        if (InputManager::getInstance().KeyTriggered(MK_LBUTTON))
+        {
+            float posX = InputManager::getInstance().GetMousePos().x;
+            float posY = InputManager::getInstance().GetMousePos().y;
+            Console::getInstance().ScreenToConsole(posX, posY);
+
+            if (retryB.IsClicked(uVec2(posX, posY)))
+            {
+                InputManager::getInstance().idxX = 0;
+                InputManager::getInstance().idxY = 0;
+                Console::getInstance().Clear();
+                break;
+            }
+            if (exitB.IsClicked(uVec2(posX, posY)))
+            {
+                playing_ = false;
+                Console::getInstance().Clear();
+                break;
+            }
+        }
+    }
+
+    /*
     std::cout << "Press SPACE for a new game, ESC to exit" << std::endl;
     while (true)
     {
@@ -221,6 +279,7 @@ void Game::EndGame(bool win)
             break;
         }
     }
+    */
 }
 
 void ProfileManager::RegisterUser(std::string username)

@@ -373,6 +373,9 @@ void Board::UpdateAllBoard()
 #ifdef NEW_RENDER
 void Board::PrintBoard()
 {
+    Console::getInstance().Clear();
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, (Console::getInstance().charRows - sizeY_ * 2) / 2);
+
 #ifdef DRAW_BOARD_LEGENDS
     std::cout.width(4);
     for(unsigned int i = 0; i < sizeX_; ++i)
@@ -392,7 +395,8 @@ void Board::PrintBoard()
         std::cout.width(4 * sizeX_ + 4);
 #endif //DRAW_BOARD_LEGENDS
 
-        std::cout << tmpLine << std::endl;
+        std::cout << tmpLine;
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, Console::getInstance().GetCursorPos().Y + 1);
 
 #ifdef DRAW_BOARD_LEGENDS
         std::cout.width(3);
@@ -477,7 +481,8 @@ void Board::PrintBoard()
                 Console::getInstance().ChangeTextColor(COLORS::BLACK);
             }
         }
-        std::cout << "|" << std::endl;
+        std::cout << "|";
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, Console::getInstance().GetCursorPos().Y + 1);
     }
 
 #ifdef DRAW_BOARD_LEGENDS
