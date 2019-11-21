@@ -79,8 +79,8 @@ void Board::CreateBoard()
     unsigned int i = 0;
     while(i < mines_)
     {
-        int x = rand()/((RAND_MAX + 1u)/(sizeX_ - 1));
-        int y = rand()/((RAND_MAX + 1u)/(sizeY_ - 1));
+        int x = rand()/((RAND_MAX + 1u)/(sizeX_));
+        int y = rand()/((RAND_MAX + 1u)/(sizeY_));
 
         unsigned int idx = TransformToIndex(x, y);
 
