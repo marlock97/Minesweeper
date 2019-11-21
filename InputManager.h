@@ -45,8 +45,23 @@ class BoxButton : public ConsoleButton
 public:
     BoxButton(int sizeX, int sizeY, int posX, int posY);
     BoxButton(uVec2 bSize, uVec2 pos);
-    bool IsClicked(uVec2 mousePos);
     void UpdateText(std::string newText);
+};
+
+class HSlider
+{
+public:
+    HSlider(int sizeX, uVec2 position, int minVal, int maxVal, std::string legend);
+    bool IsClicked(uVec2 mousePos);
+    float GetValue();
+//private:
+    int sizeX_;
+    uVec2 position_;
+    int min_;
+    int max_;
+    std::string legend_;
+
+    float currX;
 };
 
 class InputManager

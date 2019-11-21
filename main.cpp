@@ -1,6 +1,5 @@
 #include <iostream>
-//#include <string>
-//#include <Winsock2.h> //socket, bind, listen...
+#include <iomanip> //setprecision
 #include "GameManager.h"
 #include "InputManager.h"
 #include "Minesweeper.h"
@@ -12,9 +11,7 @@
 /*
 TODO:
     -Online scoreboard.
-
     -Gfx (OpenGL).
-    -Mouse support.
 */
 
 int main()
@@ -25,10 +22,25 @@ int main()
     /*TESTS
     bool cont = true;
 
+    std::string legendX = "Size X: ";
+    HSlider sliderX(40, uVec2(Console::getInstance().charColumns / 2, Console::getInstance().charRows / 2), 0, 56, legendX);
+
     while (cont)
     {
-        std::cout << GetConsoleWindow() << " : " << GetForegroundWindow() << std::endl;
-        std::cin >> cont;
+        float posX = InputManager::getInstance().GetMousePos().x;
+        float posY = InputManager::getInstance().GetMousePos().y;
+        Console::getInstance().ScreenToConsole(posX, posY);
+
+        if(InputManager::getInstance().KeyPressed(MK_LBUTTON))
+        {
+            if(sliderX.IsClicked(uVec2(posX, posY)))
+            {
+                int val = static_cast<int>(sliderX.GetValue());
+            }
+        }
+
+        if(InputManager::getInstance().KeyTriggered(VK_ESCAPE))
+            cont = false;
     }
     //TESTS*/
 
@@ -47,12 +59,12 @@ int main()
         game.StartGame();
 
         std::string retryS = "  RETRY  ";
-        BoxButton retryB(retryS.size(), 1, Console::getInstance().charColumns / 2 - retryS.size() * 2, game.gameBoard_.boardStartY + game.gameBoard_.GetSizeY() * 2 + 1);
+        BoxButton retryB(retryS.size(), 1, Console::getInstance().charColumns / 2 - game.gameBoard_.GetSizeX() * 2 + 4, game.gameBoard_.boardStartY + game.gameBoard_.GetSizeY() * 2 + 1);
         Console::getInstance().ChangeTextColor(COLORS::GREEN);
         retryB.UpdateText(retryS);
 
         std::string exitS = "  EXIT  ";
-        BoxButton exitB(exitS.size(), 1, Console::getInstance().charColumns / 2 + exitS.size() * 2, game.gameBoard_.boardStartY + game.gameBoard_.GetSizeY() * 2 + 1);
+        BoxButton exitB(exitS.size(), 1, Console::getInstance().charColumns / 2 + game.gameBoard_.GetSizeX() * 2 - exitS.size() + 3, game.gameBoard_.boardStartY + game.gameBoard_.GetSizeY() * 2 + 1);
         Console::getInstance().ChangeTextColor(COLORS::RED);
         exitB.UpdateText(exitS);
         Console::getInstance().ChangeTextColor(COLORS::BLACK);
@@ -68,6 +80,10 @@ int main()
         //Game loop
         while(true)
         {
+            Console::getInstance().GoToXY(Console::getInstance().charColumns / 2 - 4, game.gameBoard_.boardStartY - 4);
+            double time = game.timer_.Stop();
+            std::cout << "Time: " << std::fixed << std::setprecision(2) << time;
+
             if(InputManager::getInstance().KeyTriggered('W') ||
                     InputManager::getInstance().KeyTriggered(VK_UP))
             {
@@ -175,7 +191,7 @@ int main()
                     if (game.ended_)
                     {
                         game.gameBoard_.RevealMines();
-                        game.EndGame(false);
+                        game.EndGame(true);
                         break;
                     }
                 }
@@ -252,5 +268,6 @@ int main()
             }
         }
     }
+
     return 0;
 }

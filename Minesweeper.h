@@ -1,8 +1,10 @@
 #pragma once
 #include <vector>
 
-#define WINDOW_WIDTH  1920
+#define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1050
+//640
+//350
 
 struct Tile
 {

@@ -37,19 +37,6 @@ BoxButton::BoxButton(int sizeX, int sizeY, int posX, int posY) : ConsoleButton(s
 {
 }
 
-//BoxButton::BoxButton(uVec2 bSize, uVec2 pos) : ConsoleButton(uVec2 bSize, uVec2 pos)
-//{
-//}
-
-bool BoxButton::IsClicked(uVec2 mousePos)
-{
-    if (mousePos.x >= position_.x && mousePos.x <= position_.x + size_.x &&
-        mousePos.y >= position_.y && mousePos.y <= position_.y + size_.y)
-        return true;
-    else
-        return false;
-}
-
 void BoxButton::UpdateText(std::string newText)
 {
     text_ = newText;
@@ -67,6 +54,61 @@ void BoxButton::UpdateText(std::string newText)
     Console::getInstance().GoToXY(position_.x - 1, position_.y + 1);
     for (unsigned int i = 0; i < size_.x + 2; ++i)
         std::cout << '-';
+}
+
+HSlider::HSlider(int sizeX, uVec2 position, int minVal, int maxVal, std::string legend) : sizeX_(sizeX), position_(position), min_(minVal), max_(maxVal), legend_(legend)
+{
+    currX = sizeX_ / 2;
+
+    Console::getInstance().GoToXY(position_.x - 1, position_.y - 1);
+    for (unsigned int i = 0; i < sizeX_ + 2; ++i)
+        std::cout << '-';
+    Console::getInstance().GoToXY(position_.x - 1, position_.y);
+    std::cout << '|';
+    for (unsigned int i = 0; i < sizeX_; ++i)
+        std::cout << '-';
+    std::cout << '|';
+    Console::getInstance().GoToXY(position_.x - 1, position_.y + 1);
+    for (unsigned int i = 0; i < sizeX_ + 2; ++i)
+        std::cout << '-';
+
+    Console::getInstance().GoToXY(position_.x + currX, position_.y);
+    std::cout << '\xDB';
+
+    Console::getInstance().GoToXY(position_.x + (sizeX_ - legend_.size()) / 2, position_.y - 2);
+    std::cout << legend_;
+
+    int val = static_cast<int>(GetValue());
+    Console::getInstance().GoToXY(position_.x + (sizeX_ + legend_.size()) / 2, position_.y - 2);
+    std::cout << val;
+}
+
+bool HSlider::IsClicked(uVec2 mousePos)
+{
+    if (mousePos.x >= position_.x && mousePos.x < position_.x + sizeX_ &&
+        mousePos.y >= position_.y && mousePos.y <= position_.y )
+    {
+        Console::getInstance().GoToXY(position_.x + currX, position_.y);
+        std::cout << "-";
+        currX = mousePos.x - position_.x;
+        Console::getInstance().GoToXY(mousePos.x, position_.y);
+        std::cout << '\xDB';
+
+        Console::getInstance().GoToXY(position_.x + (sizeX_ + legend_.size()) / 2, position_.y - 2);
+        std::cout << "        ";
+        Console::getInstance().GoToXY(position_.x + (sizeX_ + legend_.size()) / 2, position_.y - 2);
+        std::cout << static_cast<int>(GetValue());
+
+        return true;
+    }
+    else
+        return false;
+}
+
+float HSlider::GetValue()
+{
+    float val = min_ + max_ * ((currX + 1) / sizeX_);
+    return val;
 }
 
 void InputManager::Initialize()

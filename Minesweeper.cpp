@@ -8,7 +8,7 @@
 
 //Initializes checked flag of all tiles, 1 to render
 #define RENDER_REAL_VALUES 0
-#undef DRAW_BOARD_LEGENDS
+#define DRAW_BOARD_LEGENDS
 #define PRINT_IDX_POS 0
 #undef CHECK_SURROUNDING
 
@@ -384,7 +384,8 @@ void Board::PrintBoard()
         std::cout.width(3);
         std::cout << i;
     }
-    std::cout << "|" << std::endl;
+    std::cout << "|";// << std::endl;
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, Console::getInstance().GetCursorPos().Y + 1);
 #endif //DRAW_BOARD_LEGENDS
 
     std::string tmpLine((4 * sizeX_) + 1, '-');
