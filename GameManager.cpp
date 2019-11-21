@@ -161,12 +161,14 @@ void Game::StartGame()
     else if(difficulty == 3)
     {
         Console::getInstance().Clear();
-        int sizeX, sizeY, mines;
+        int sizeX = 0;
+        int sizeY = 0;
+        int mines = 0;
 
         std::string xS = "Size X: ";
         HSlider sliderX(56, uVec2((Console::getInstance().charColumns - 56) / 2, Console::getInstance().charRows / 2 - 4), 0, 56, xS);
         std::string yS = "Size Y: ";
-        HSlider sliderY(34, uVec2((Console::getInstance().charColumns - 34) / 2, Console::getInstance().charRows / 2), 0, 34, yS);
+        HSlider sliderY(32, uVec2((Console::getInstance().charColumns - 32) / 2, Console::getInstance().charRows / 2), 0, 32, yS);
         std::string mS = "Mines: ";
         HSlider sliderM(99, uVec2((Console::getInstance().charColumns - 100) / 2, Console::getInstance().charRows / 2 + 4), 0, 500, mS);
 
@@ -208,7 +210,7 @@ void Game::StartGame()
         */
 
         if(sizeX == 0 && sizeY == 0 && mines == 0)
-            gameBoard_ = Board(56, 34, 400); //Giant
+            gameBoard_ = Board(56, 32, 400); //Giant
         else
         {
             //If the mines are more than the tiles available, clamp to max
@@ -216,9 +218,9 @@ void Game::StartGame()
                 mines = sizeX * sizeY - 1;
 
             if(sizeX <= 0)
-                sizeX = 1;
+                sizeX = 56;
             if(sizeY <= 0)
-                sizeY = 1;
+                sizeY = 32;
             if (mines <= 0)
                 mines = 1;
 
@@ -236,7 +238,7 @@ void Game::EndGame(bool win)
     double time = timer_.Stop();
     gameBoard_.UpdateAllBoard();
     Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2,
-                    gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2 + 4);
+                    gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2 + 1);
 
     if(win)
     {
