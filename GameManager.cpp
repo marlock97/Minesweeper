@@ -36,7 +36,11 @@ void Console::GoToXY(int x, int y)
     COORD coords;
     coords.X = x;
     coords.Y = y;
-    SetConsoleCursorPosition(handle, coords);
+
+    if (!SetConsoleCursorPosition(handle, coords))
+    {
+        std::cout << "Console::GoToXY failed.";
+    }
 }
 
 COORD Console::GetCursorPos()
@@ -90,35 +94,62 @@ void Game::StartGame()
 {
     ended_ = false;
 
-    std::cout << "Select difficulty: " << std::endl;
-    std::cout << "0: Beginner" << std::endl;
-    std::cout << "1: Intermediate" << std::endl;
-    std::cout << "2: Expert" << std::endl;
-    //std::cout << "3: Custom" << std::endl;
+    std::string difficultyS = "--Select difficulty--";
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - difficultyS.size()) / 2, Console::getInstance().charRows / 2 - 8);
+    std::cout << difficultyS;
+
+    std::string text0 = "  Beginner  ";
+    BoxButton begginerB(text0.size(), 1, (Console::getInstance().charColumns - text0.size()) / 2, Console::getInstance().charRows / 2 - 4);
+    Console::getInstance().ChangeTextColor(COLORS::GREEN);
+    begginerB.UpdateText(text0);
+
+    std::string text1 = "  Intermediate  ";
+    BoxButton intermidiateB(text1.size(), 1, (Console::getInstance().charColumns - text1.size()) / 2, Console::getInstance().charRows / 2);
+    Console::getInstance().ChangeTextColor(COLORS::BLUE);
+    intermidiateB.UpdateText(text1);
+
+    std::string text2 = "  Expert  ";
+    BoxButton expertB(text2.size(), 1, (Console::getInstance().charColumns - text2.size()) / 2, Console::getInstance().charRows / 2 + 4);
+    Console::getInstance().ChangeTextColor(COLORS::RED);
+    expertB.UpdateText(text2);
+
+    std::string text3 = "  Custom  ";
+    BoxButton customB(text3.size(), 1, (Console::getInstance().charColumns - text3.size()) / 2, Console::getInstance().charRows / 2 + 8);
+    Console::getInstance().ChangeTextColor(COLORS::PURPLE);
+    customB.UpdateText(text3);
+
+    Console::getInstance().ChangeTextColor(COLORS::BLACK);
 
     unsigned int difficulty;
     while (true)
     {
-        if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::ZERO))
+        if (InputManager::getInstance().KeyTriggered(MK_LBUTTON) || InputManager::getInstance().KeyTriggered(MK_RBUTTON))
         {
-            difficulty = 0;
-            break;
+            float posX = InputManager::getInstance().GetMousePos().x;
+            float posY = InputManager::getInstance().GetMousePos().y;
+            Console::getInstance().ScreenToConsole(posX, posY);
+
+            if (begginerB.IsClicked(uVec2(posX, posY)))
+            {
+                difficulty = 0;
+                break;
+            }
+            if (intermidiateB.IsClicked(uVec2(posX, posY)))
+            {
+                difficulty = 1;
+                break;
+            }
+            if (expertB.IsClicked(uVec2(posX, posY)))
+            {
+                difficulty = 2;
+                break;
+            }
+            if (customB.IsClicked(uVec2(posX, posY)))
+            {
+                difficulty = 3;
+                break;
+            }
         }
-        if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::ONE))
-        {
-            difficulty = 1;
-            break;
-        }
-        if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::TWO))
-        {
-            difficulty = 2;
-            break;
-        }
-        //if (InputManager::getInstance().KeyTriggered(VK_NUMBERS::THREE))
-        //{
-        //    difficulty = 3;
-        //    break;
-        //}
     }
 
     if(difficulty == 0)
@@ -129,32 +160,72 @@ void Game::StartGame()
         gameBoard_ = Board(); //Default constructor is set to max difficulty
     else if(difficulty == 3)
     {
-        //unsigned int sizeX, sizeY, mines;
-        //
-        //std::cout << "Enter board columns: \n";// << std::endl;
-        //sizeX = InputManager::getInstance().ReadUnsignedNumber();
-        //std::cout << "Enter board rows: \n";// << std::endl;
-        //sizeY = InputManager::getInstance().ReadUnsignedNumber();
-        //std::cout << "Enter board mines: \n";// << std::endl;
-        //mines = InputManager::getInstance().ReadUnsignedNumber();
-        //
-        //if(sizeX == 0 && sizeY == 0 && mines == 0)
-        //    gameBoard_ = Board(57, 38, 400); //Giant
-        //else
-        //{
-        //    //If the mines are more than the tiles available, clamp to max
-        //    if(mines > sizeX * sizeY)
-        //        mines = sizeX * sizeY;
-        //
-        //    if(sizeX <= 0)
-        //        sizeX = 1;
-        //    if(sizeY <= 0)
-        //        sizeY = 1;
-        //    if (mines <= 0)
-        //        mines = 1;
-        //
-        //    gameBoard_ = Board(sizeX, sizeY, mines);
-        //}
+        Console::getInstance().Clear();
+        int sizeX = 0;
+        int sizeY = 0;
+        int mines = 0;
+
+        std::string xS = "Size X: ";
+        HSlider sliderX(56, uVec2((Console::getInstance().charColumns - 56) / 2, Console::getInstance().charRows / 2 - 4), 0, 56, xS);
+        std::string yS = "Size Y: ";
+        HSlider sliderY(32, uVec2((Console::getInstance().charColumns - 32) / 2, Console::getInstance().charRows / 2), 0, 32, yS);
+        std::string mS = "Mines: ";
+        HSlider sliderM(99, uVec2((Console::getInstance().charColumns - 100) / 2, Console::getInstance().charRows / 2 + 4), 0, 500, mS);
+
+        std::string okS = "  OK  ";
+        BoxButton okB(okS.size(), 1, (Console::getInstance().charColumns - okS.size()) / 2, Console::getInstance().charRows / 2 + 10);
+        Console::getInstance().ChangeTextColor(COLORS::GREEN);
+        okB.UpdateText(okS);
+        Console::getInstance().ChangeTextColor(COLORS::BLACK);
+
+        while(true)
+        {
+            float posX = InputManager::getInstance().GetMousePos().x;
+            float posY = InputManager::getInstance().GetMousePos().y;
+            Console::getInstance().ScreenToConsole(posX, posY);
+
+            if(InputManager::getInstance().KeyPressed(MK_LBUTTON))
+            {
+                if(sliderX.IsClicked(uVec2(posX, posY)))
+                    sizeX = static_cast<int>(sliderX.GetValue());
+
+                if(sliderY.IsClicked(uVec2(posX, posY)))
+                    sizeY = static_cast<int>(sliderY.GetValue());
+
+                if(sliderM.IsClicked(uVec2(posX, posY)))
+                    mines = static_cast<int>(sliderM.GetValue());
+
+                if(okB.IsClicked(uVec2(posX, posY)))
+                    break;
+            }
+        }
+
+        /*
+        std::cout << "Enter board columns: \n";// << std::endl;
+        sizeX = InputManager::getInstance().ReadUnsignedNumber();
+        std::cout << "Enter board rows: \n";// << std::endl;
+        sizeY = InputManager::getInstance().ReadUnsignedNumber();
+        std::cout << "Enter board mines: \n";// << std::endl;
+        mines = InputManager::getInstance().ReadUnsignedNumber();
+        */
+
+        if(sizeX == 0 && sizeY == 0 && mines == 0)
+            gameBoard_ = Board(56, 32, 400); //Giant
+        else
+        {
+            //If the mines are more than the tiles available, clamp to max
+            if(mines >= sizeX * sizeY)
+                mines = sizeX * sizeY - 1;
+
+            if(sizeX <= 0)
+                sizeX = 56;
+            if(sizeY <= 0)
+                sizeY = 32;
+            if (mines <= 0)
+                mines = 1;
+
+            gameBoard_ = Board(sizeX, sizeY, mines);
+        }
     }
 
     gameBoard_.CreateBoard();
@@ -166,32 +237,39 @@ void Game::EndGame(bool win)
 {
     double time = timer_.Stop();
     gameBoard_.UpdateAllBoard();
-    Console::getInstance().GoToXY(gameBoard_.boardStartX + gameBoard_.GetSizeX() * 4,
-                    gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2);
-    std::cout << std::endl;
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2,
+                    gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2 + 3);
 
     if(win)
     {
-        std::cout << "You win." << std::endl;
+        std::cout << "You win.";// << std::endl;
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
         profileManager_.SaveTime(gameBoard_.GenerateFilename(), username_, time);
 
         std::cout << std::setprecision(2) << std::fixed; //Set precision to only show 2 decimals
-        std::cout << "Time: " << time << "s" << std::endl;
+        std::cout << "Time: " << time << "s";// << std::endl;
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
 
         double bestTime = 0;
         std::string bestUser = profileManager_.GetBestTime(gameBoard_.GenerateFilename(), bestTime);
-        std::cout << "Best time: " << std::endl;
+        std::cout << "Best time: ";// << std::endl;
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
 
         if(!bestUser.empty())
         {
-            std::cout << '\t' << "User: " << bestUser << std::endl;
-            std::cout << '\t' << "Time: " << bestTime << "s" << std::endl;
+            std::cout << '\t' << "User: " << bestUser;// << std::endl;
+            Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
+            std::cout << '\t' << "Time: " << bestTime << "s";// << std::endl;
+            Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
         }
         else
         {
-            std::cout << '\t' << "New record! " << std::endl;
-            std::cout << '\t' << "User: " << username_ << std::endl;
-            std::cout << '\t' << "Time: " << time << "s" << std::endl;
+            std::cout << '\t' << "New record! ";// << std::endl;
+            Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
+            std::cout << '\t' << "User: " << username_;// << std::endl;
+            Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
+            std::cout << '\t' << "Time: " << time << "s";// << std::endl;
+            Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
         }
 
         //Set out stream back to default
@@ -200,10 +278,48 @@ void Game::EndGame(bool win)
     }
     else
     {
-        std::cout << "Game over." << std::endl;
-        std::cout << "Mines remaining: " << gameBoard_.GetMines() - gameBoard_.GetFoundMines() << "/" << gameBoard_.GetMines() << std::endl;
+        std::cout << "Game over.";// << std::endl;
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
+        std::cout << "Mines remaining: " << gameBoard_.GetMines() - gameBoard_.GetFoundMines() << "/" << gameBoard_.GetMines();// << std::endl;
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - gameBoard_.GetSizeX() * 2) / 2, Console::getInstance().GetCursorPos().Y + 1);
     }
 
+    std::string retryS = "  RETRY  ";
+    BoxButton retryB(retryS.size(), 1, Console::getInstance().charColumns / 2 - gameBoard_.GetSizeX() * 2 + 4, gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2 + 1);
+    Console::getInstance().ChangeTextColor(COLORS::GREEN);
+    retryB.UpdateText(retryS);
+
+    std::string exitS = "  EXIT  ";
+    BoxButton exitB(exitS.size(), 1, Console::getInstance().charColumns / 2 + gameBoard_.GetSizeX() * 2 - exitS.size() + 3, gameBoard_.boardStartY + gameBoard_.GetSizeY() * 2 + 1);
+    Console::getInstance().ChangeTextColor(COLORS::RED);
+    exitB.UpdateText(exitS);
+    Console::getInstance().ChangeTextColor(COLORS::BLACK);
+
+    while (true)
+    {
+        if (InputManager::getInstance().KeyTriggered(MK_LBUTTON))
+        {
+            float posX = InputManager::getInstance().GetMousePos().x;
+            float posY = InputManager::getInstance().GetMousePos().y;
+            Console::getInstance().ScreenToConsole(posX, posY);
+
+            if (retryB.IsClicked(uVec2(posX, posY)))
+            {
+                InputManager::getInstance().idxX = 0;
+                InputManager::getInstance().idxY = 0;
+                Console::getInstance().Clear();
+                break;
+            }
+            if (exitB.IsClicked(uVec2(posX, posY)))
+            {
+                playing_ = false;
+                Console::getInstance().Clear();
+                break;
+            }
+        }
+    }
+
+    /*
     std::cout << "Press SPACE for a new game, ESC to exit" << std::endl;
     while (true)
     {
@@ -221,6 +337,7 @@ void Game::EndGame(bool win)
             break;
         }
     }
+    */
 }
 
 void ProfileManager::RegisterUser(std::string username)

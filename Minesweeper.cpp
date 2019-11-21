@@ -8,7 +8,7 @@
 
 //Initializes checked flag of all tiles, 1 to render
 #define RENDER_REAL_VALUES 0
-#undef DRAW_BOARD_LEGENDS
+#define DRAW_BOARD_LEGENDS
 #define PRINT_IDX_POS 0
 #undef CHECK_SURROUNDING
 
@@ -373,6 +373,9 @@ void Board::UpdateAllBoard()
 #ifdef NEW_RENDER
 void Board::PrintBoard()
 {
+    Console::getInstance().Clear();
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, (Console::getInstance().charRows - sizeY_ * 2) / 2);
+
 #ifdef DRAW_BOARD_LEGENDS
     std::cout.width(4);
     for(unsigned int i = 0; i < sizeX_; ++i)
@@ -381,7 +384,8 @@ void Board::PrintBoard()
         std::cout.width(3);
         std::cout << i;
     }
-    std::cout << "|" << std::endl;
+    std::cout << "|";// << std::endl;
+    Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, Console::getInstance().GetCursorPos().Y + 1);
 #endif //DRAW_BOARD_LEGENDS
 
     std::string tmpLine((4 * sizeX_) + 1, '-');
@@ -392,7 +396,8 @@ void Board::PrintBoard()
         std::cout.width(4 * sizeX_ + 4);
 #endif //DRAW_BOARD_LEGENDS
 
-        std::cout << tmpLine << std::endl;
+        std::cout << tmpLine;
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, Console::getInstance().GetCursorPos().Y + 1);
 
 #ifdef DRAW_BOARD_LEGENDS
         std::cout.width(3);
@@ -477,7 +482,8 @@ void Board::PrintBoard()
                 Console::getInstance().ChangeTextColor(COLORS::BLACK);
             }
         }
-        std::cout << "|" << std::endl;
+        std::cout << "|";
+        Console::getInstance().GoToXY((Console::getInstance().charColumns - sizeX_ * 4) / 2, Console::getInstance().GetCursorPos().Y + 1);
     }
 
 #ifdef DRAW_BOARD_LEGENDS
