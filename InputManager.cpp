@@ -1,5 +1,5 @@
 #define _WIN32_WINNT   0x0601 //Define windows version to 7 (Needed in order to use GetConsoleWindow)
-#include <windows.h>
+//#include <windows.h>
 #include <string>
 #include "GameManager.h"
 #include "InputManager.h"

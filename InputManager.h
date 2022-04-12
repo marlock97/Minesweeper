@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <iostream>
-#include <windows.h>
+//#include <windows.h>
 #include "math.h"
 
 #define INPUT_KEY_NUMBER 256
